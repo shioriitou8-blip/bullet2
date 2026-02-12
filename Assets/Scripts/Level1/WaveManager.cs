@@ -18,11 +18,11 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private BulletPatternSystem bulletPatternSystem;
 
     [Header("Spawn Space")]
-    [SerializeField] private float spawnTopY = 5.9f;
-    [SerializeField] private float spawnXMin = -3.7f;
-    [SerializeField] private float spawnXMax = 3.7f;
-    [SerializeField] private float preBossXMin = -1.9f;
-    [SerializeField] private float preBossXMax = 1.9f;
+    [SerializeField] private float spawnRightX = 8.8f;
+    [SerializeField] private float spawnYMin = -4.2f;
+    [SerializeField] private float spawnYMax = 4.2f;
+    [SerializeField] private float preBossYMin = -1.9f;
+    [SerializeField] private float preBossYMax = 1.9f;
 
     [Header("Difficulty")]
     [SerializeField] private DifficultySettings difficulty = new DifficultySettings();
@@ -280,20 +280,19 @@ public class WaveManager : MonoBehaviour
 
     private Vector2 GetTopSpawnPosition(bool restrictForPreBoss = false)
     {
-        float minX = restrictForPreBoss ? preBossXMin : spawnXMin;
-        float maxX = restrictForPreBoss ? preBossXMax : spawnXMax;
-        float x = Random.Range(minX, maxX);
-        return new Vector2(x, spawnTopY);
+        float minY = restrictForPreBoss ? preBossYMin : spawnYMin;
+        float maxY = restrictForPreBoss ? preBossYMax : spawnYMax;
+        float y = Random.Range(minY, maxY);
+        return new Vector2(spawnRightX, y);
     }
 
     private Vector2 GetAlternatingLaneSpawnPosition()
     {
-        float[] laneHeights = { spawnTopY, spawnTopY - 1.4f, spawnTopY - 2.8f };
+        float[] laneHeights = { 3f, 0f, -3f };
         float y = laneHeights[laneIndex % laneHeights.Length];
         laneIndex++;
 
-        float x = Random.Range(spawnXMin * 0.85f, spawnXMax * 0.85f);
-        return new Vector2(x, y);
+        return new Vector2(spawnRightX, y);
     }
 
     private LevelEnemyController.EnemyType GetMixedTypeABC()
