@@ -27,6 +27,11 @@ public class EnemyProjectile : MonoBehaviour
         despawnTime = Time.time + lifetime;
     }
 
+    private void OnEnable()
+    {
+        RuntimeSpawnGroups.MoveToEnemyBullets(transform);
+    }
+
     public void Initialize(Vector2 shotDirection, float shotSpeed, float shotLifetime)
     {
         direction = shotDirection.sqrMagnitude > 0f ? shotDirection.normalized : Vector2.down;

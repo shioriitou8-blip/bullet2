@@ -176,10 +176,13 @@ private ShotProfile BuildProfile(ShotType shotType, int powerLevel, bool isFocus
     {
         Vector2 direction = Quaternion.Euler(0f, 0f, angleOffset) * Vector2.up;
         Vector3 spawnPosition = transform.position + (Vector3)(direction * spawnOffsetUnits);
+        Transform bulletGroup = RuntimeSpawnGroups.GetPlayerBulletsGroup();
 
         GameObject projectile = projectilePrefab != null
-            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity)
-            : CreateFallbackProjectile(spawnPosition);
+            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity, bulletGroup)
+            : CreateFallbackProjectile(spawnPosition, bulletGroup);
+
+        RuntimeSpawnGroups.MoveToPlayerBullets(projectile.transform);
 
         PlayerProjectile projectileLogic = projectile.GetComponent<PlayerProjectile>();
         if (projectileLogic == null)
@@ -199,9 +202,14 @@ private ShotProfile BuildProfile(ShotType shotType, int powerLevel, bool isFocus
         Destroy(projectile, projectileLifetime + 0.1f);
     }
 
-    private GameObject CreateFallbackProjectile(Vector3 position)
+    private GameObject CreateFallbackProjectile(Vector3 position, Transform parent)
     {
         GameObject bullet = new GameObject("PlayerProjectile");
+        if (parent != null)
+        {
+            bullet.transform.SetParent(parent, false);
+        }
+
         bullet.transform.position = position;
 
         CircleCollider2D collider = bullet.AddComponent<CircleCollider2D>();

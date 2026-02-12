@@ -26,6 +26,15 @@ public class LevelBullet : MonoBehaviour
 
     private void OnEnable()
     {
+        if (fromEnemy)
+        {
+            RuntimeSpawnGroups.MoveToEnemyBullets(transform);
+        }
+        else
+        {
+            RuntimeSpawnGroups.MoveToPlayerBullets(transform);
+        }
+
         despawnTime = Time.time + Mathf.Max(0.05f, lifetime);
     }
 
@@ -36,6 +45,15 @@ public class LevelBullet : MonoBehaviour
         lifetime = Mathf.Max(0.05f, bulletLifetime);
         fromEnemy = enemyOwned;
         despawnTime = Time.time + lifetime;
+        if (fromEnemy)
+        {
+            RuntimeSpawnGroups.MoveToEnemyBullets(transform);
+        }
+        else
+        {
+            RuntimeSpawnGroups.MoveToPlayerBullets(transform);
+        }
+
         EnsureVisual();
     }
 
