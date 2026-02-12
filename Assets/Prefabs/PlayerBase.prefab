@@ -59,6 +59,7 @@ MonoBehaviour:
   enemyMask:
     serializedVersion: 2
     m_Bits: 0
+  baseShotDirection: {x: 0, y: 1}
   currentShotType: 0
 --- !u!114 &2015116028338110773
 MonoBehaviour:
@@ -191,7 +192,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!1 &6867805770332220727
 GameObject:
