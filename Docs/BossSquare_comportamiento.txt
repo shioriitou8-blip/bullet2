@@ -1,0 +1,50 @@
+﻿Boss Square - comportamiento actual
+
+Script principal: Assets/Scripts/Level1/BossSquarePatternController.cs
+Scripts relacionados: BossLaserBeam.cs, LevelBullet.cs, BossHealth.cs
+
+1) Entrada y posicionamiento
+- Al activarse, el boss no ataca de inmediato.
+- Primero se mueve hacia centerPosition (por defecto 0,0) con moveSpeed (2.8).
+- Cuando llega dentro del umbral centerArrivalThreshold (0.06), empieza la rutina de ataques.
+
+2) Ataque de balas en circulos alternados
+- Intervalo base entre ciclos: launchInterval (1.2s).
+- Cada ciclo de ataque real se divide en dos rafagas:
+  a) Rafaga 1 (sentido horario): dispara bulletsPerCircle (16) balas en circulo.
+     Cada bala gira con clockwiseCircleTurnRate (36 grados/seg).
+  b) Tras oppositeRotationDelay (0.2s), Rafaga 2 (sentido antihorario):
+     otro circulo de 16 balas con counterClockwiseCircleTurnRate (-36 grados/seg).
+- En cada nueva rafaga se desplaza el angulo de salida con angleStepPerLaunch (10 grados),
+  produciendo patrones rotados y mas densos con el tiempo.
+- Cada bala usa LevelBullet:
+  - velocidad bulletSpeed (3.25)
+  - vida bulletLifetime (7s)
+  - si toca al jugador, llama ReceiveEnemyHit() y se devuelve al pool.
+
+3) Ataque de lasers en cruz (si enableCrossLasers = true)
+- Cada laserInterval (2.4s) se crea/activa una cruz de 4 rayos (derecha, izquierda, arriba, abajo).
+- Fases del ataque de laser:
+  a) Growing: crece hasta laserLength (10.5) durante laserGrowDuration (2.8s).
+  b) Rotating: rota la cruz hasta laserMaxRotationDegrees (90) con velocidad
+     laserSpinDegreesPerSecond * laserSpinSpeedMultiplier (160 * 0.82).
+  c) Holding: mantiene estado durante laserHoldDuration (0.45s).
+  d) Shrinking: se contrae en laserShrinkDuration (0.9s) y se desactiva.
+- Ancho visual del laser: laserWidth (0.24).
+- Daño del laser (BossLaserBeam): mientras el jugador permanece dentro del trigger,
+  aplica ReceiveEnemyHit() cada laserDamageInterval (0.25s).
+
+4) Pooling y creacion runtime
+- Si no existe ObjectPool, el boss crea uno en runtime (BossObjectPool).
+- Registra pool para EnemyBullet con preloadBullets (120) para evitar instanciaciones repetidas.
+- Si no existen los objetos de laser, tambien se crean en runtime bajo "BossLasers".
+
+5) Vida del boss
+- BossHealth maneja la vida con maxHealth/currentHealth (por defecto 300/300).
+- Implementa IDamageable: TakeDamage() reduce vida y Heal() cura (sin sobrepasar max).
+- Este script no incluye muerte/destruccion por si solo; solo administra el valor de vida.
+
+Resumen rapido
+- El Boss Square combina presion constante de balas curvadas (doble circulo alternado)
+  con ventanas periodicas de control de espacio usando una cruz laser rotatoria.
+- El peligro sube por superposicion: balas activas + fase de laser en pantalla.
