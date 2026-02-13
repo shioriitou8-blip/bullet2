@@ -1,0 +1,56 @@
+EXPLICACION PASO A PASO: COMO SE GENERAN ENEMIGOS EN LEVEL1
+
+1) El nivel tiene un reloj interno.
+- El LevelManager cuenta el tiempo del nivel en segundos.
+- Con ese tiempo decide en que fase estas (Intro, Pattern 1, Radial, Combination, High Pressure, Pre-Boss, MiniBoss).
+
+2) El sistema de olas revisa la fase actual.
+- WaveManager se ejecuta cada frame.
+- Si no estas en MiniBoss ni en Completed, WaveManager decide si ya toca spawn por tiempo.
+
+3) Cada fase tiene reglas de spawn diferentes.
+- Fase 1: enemigos tipo A, baja frecuencia.
+- Fase 2: tipo B con patron spread.
+- Fase 3: tipo C radial + apoyo tipo A.
+- Fase 4: mezcla A/B/C con mas presion.
+- Fase 5: tipo D y mayor densidad.
+- Pre-Boss: foco en radiales y espacio mas cerrado.
+
+4) Cuando toca generar, WaveManager llama al EnemySpawner.
+- Le pasa tipo de enemigo y escalas de dificultad:
+  vida, velocidad de movimiento, cadencia de disparo, velocidad de bala.
+
+5) EnemySpawner usa ObjectPool.
+- No crea/destruye enemigos en cada spawn.
+- Pide una instancia reutilizable del pool del tipo correcto (A/B/C/D).
+
+6) El enemigo sale del pool y se configura en runtime.
+- Se aplican sus stats para la fase actual.
+- Se activa en posicion de spawn (normalmente arriba de la pantalla).
+
+7) El enemigo ya activo empieza su ciclo.
+- Se mueve hacia abajo.
+- Dispara segun su tipo:
+  A = recto
+  B = spread 3
+  C = radial 8
+  D = spread 5 o radial 12
+
+8) Las balas enemigas tambien usan pool.
+- BulletPatternSystem genera las balas pidiendolas al pool.
+- Luego inicializa direccion, velocidad y vida de cada bala.
+
+9) Cuando un enemigo termina su ciclo, vuelve al pool.
+- Si sale de pantalla o muere, se desactiva.
+- En lugar de destruirse, se recicla para futuros spawns.
+
+10) Al llegar al tiempo de MiniBoss cambia el flujo.
+- LevelManager detiene el spawn normal.
+- Limpia enemigos activos.
+- Lanza MiniBoss (tambien por sistema centralizado).
+
+11) Fin del nivel.
+- Cuando MiniBoss cae, se marca level completed y se dispara la transicion final.
+
+Resumen rapido:
+LevelManager decide fase -> WaveManager decide cuando spawnear -> EnemySpawner pide objetos al pool -> Enemigos disparan usando BulletPatternSystem -> Todo vuelve al pool para reciclarse.

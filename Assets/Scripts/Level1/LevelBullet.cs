@@ -15,6 +15,7 @@ public class LevelBullet : MonoBehaviour
 
     private Vector2 direction = Vector2.down;
     private float despawnTime;
+    private float turnRateDegreesPerSecond;
     private PooledObject pooledObject;
 
     private void Awake()
@@ -38,12 +39,20 @@ public class LevelBullet : MonoBehaviour
         despawnTime = Time.time + Mathf.Max(0.05f, lifetime);
     }
 
-    public void Initialize(Vector2 moveDirection, float moveSpeed, float bulletLifetime, bool enemyOwned)
+    public void Initialize(
+        Vector2 moveDirection,
+        float moveSpeed,
+        float bulletLifetime,
+        bool enemyOwned,
+        float turnRateDegrees = 0f)
     {
         direction = moveDirection.sqrMagnitude > 0f ? moveDirection.normalized : Vector2.down;
         speed = Mathf.Max(0.1f, moveSpeed);
         lifetime = Mathf.Max(0.05f, bulletLifetime);
         fromEnemy = enemyOwned;
+        turnRateDegreesPerSecond = turnRateDegrees;
+        float facing = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0f, 0f, facing);
         despawnTime = Time.time + lifetime;
         if (fromEnemy)
         {
@@ -59,6 +68,11 @@ public class LevelBullet : MonoBehaviour
 
     private void Update()
     {
+        if (Mathf.Abs(turnRateDegreesPerSecond) > 0.01f)
+        {
+            direction = (Quaternion.Euler(0f, 0f, turnRateDegreesPerSecond * Time.deltaTime) * direction).normalized;
+        }
+
         transform.position += (Vector3)(direction * speed * Time.deltaTime);
         if (Time.time >= despawnTime)
         {
