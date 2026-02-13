@@ -21,7 +21,15 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Transform playerTarget;
 
     [Header("MiniBoss")]
-    [SerializeField] private Vector2 miniBossSpawnPosition = new Vector2(0f, 3.6f);
+    [SerializeField] private Vector2 miniBossSpawnPosition = new Vector2(3.8f, 0f);
+    [SerializeField] private bool forceMiniBossSpawnFromRight = true;
+    [SerializeField] private float miniBossRightEdgeMargin = 0.9f;
+    [SerializeField] private float miniBossRightFallbackX = 8.2f;
+    [SerializeField] private float miniBossRightSpawnY = 0f;
+
+    [Header("Player Start")]
+    [SerializeField] private bool forcePlayerStartPosition = true;
+    [SerializeField] private Vector2 playerStartPosition = new Vector2(-6f, 0f);
 
     [Header("Music")]
     [SerializeField] private AudioSource musicSource;
@@ -56,12 +64,25 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        ApplyPlayerStartPosition();
+
         if (ScoreSystem.Instance != null)
         {
             ScoreSystem.Instance.StartStage();
         }
 
         SetPhase(Level1Phase.Intro);
+    }
+
+    private void ApplyPlayerStartPosition()
+    {
+        if (!forcePlayerStartPosition || playerTarget == null)
+        {
+            return;
+        }
+
+        Vector3 current = playerTarget.position;
+        playerTarget.position = new Vector3(playerStartPosition.x, playerStartPosition.y, current.z);
     }
 
     private void Update()
@@ -197,11 +218,30 @@ public class LevelManager : MonoBehaviour
         PlayMusic(miniBossMusic, fallbackPitch: 1.16f);
         TriggerTransitionFlash();
 
-        MiniBossController miniBoss = enemySpawner.SpawnMiniBoss(miniBossSpawnPosition, HandleMiniBossDefeated);
+        MiniBossController miniBoss = enemySpawner.SpawnMiniBoss(GetMiniBossSpawnPosition(), HandleMiniBossDefeated);
         if (miniBoss == null)
         {
             CompleteLevel();
         }
+    }
+
+    private Vector2 GetMiniBossSpawnPosition()
+    {
+        if (!forceMiniBossSpawnFromRight)
+        {
+            return miniBossSpawnPosition;
+        }
+
+        Camera cam = Camera.main;
+        if (cam != null && cam.orthographic)
+        {
+            float halfWidth = cam.orthographicSize * cam.aspect;
+            float x = cam.transform.position.x + halfWidth - Mathf.Max(0.1f, miniBossRightEdgeMargin);
+            float y = cam.transform.position.y + miniBossRightSpawnY;
+            return new Vector2(x, y);
+        }
+
+        return new Vector2(miniBossRightFallbackX, miniBossRightSpawnY);
     }
 
     private void HandleMiniBossDefeated(MiniBossController _)

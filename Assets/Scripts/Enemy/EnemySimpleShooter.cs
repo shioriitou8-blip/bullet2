@@ -136,10 +136,13 @@ public class EnemySimpleShooter : MonoBehaviour, IDamageable
     {
         Vector2 direction = Quaternion.Euler(0f, 0f, angleOffset) * Vector2.down;
         Vector3 spawnPosition = transform.position + (Vector3)(direction * spawnOffsetUnits);
+        Transform bulletGroup = RuntimeSpawnGroups.GetEnemyBulletsGroup();
 
         GameObject projectile = projectilePrefab != null
-            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity)
-            : CreateFallbackProjectile(spawnPosition);
+            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity, bulletGroup)
+            : CreateFallbackProjectile(spawnPosition, bulletGroup);
+
+        RuntimeSpawnGroups.MoveToEnemyBullets(projectile.transform);
 
         EnemyProjectile projectileLogic = projectile.GetComponent<EnemyProjectile>();
         if (projectileLogic == null)
@@ -202,9 +205,14 @@ public class EnemySimpleShooter : MonoBehaviour, IDamageable
         Destroy(gameObject);
     }
 
-    private GameObject CreateFallbackProjectile(Vector3 position)
+    private GameObject CreateFallbackProjectile(Vector3 position, Transform parent)
     {
         GameObject bullet = new GameObject("EnemyProjectile");
+        if (parent != null)
+        {
+            bullet.transform.SetParent(parent, false);
+        }
+
         bullet.transform.position = position;
 
         CircleCollider2D collider = bullet.AddComponent<CircleCollider2D>();

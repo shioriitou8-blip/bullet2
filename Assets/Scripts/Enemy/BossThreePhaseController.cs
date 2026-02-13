@@ -754,9 +754,12 @@ private void Die()
 
     private void SpawnProjectileAtPosition(Vector3 position, Vector2 direction, float speed)
     {
+        Transform bulletGroup = RuntimeSpawnGroups.GetEnemyBulletsGroup();
         GameObject projectile = projectilePrefab != null
-            ? Instantiate(projectilePrefab, position, Quaternion.identity)
-            : CreateFallbackProjectile(position);
+            ? Instantiate(projectilePrefab, position, Quaternion.identity, bulletGroup)
+            : CreateFallbackProjectile(position, bulletGroup);
+
+        RuntimeSpawnGroups.MoveToEnemyBullets(projectile.transform);
 
         EnemyProjectile projectileLogic = projectile.GetComponent<EnemyProjectile>();
         if (projectileLogic == null)
@@ -767,9 +770,14 @@ private void Die()
         projectileLogic.Initialize(direction, speed, projectileLifetime);
     }
 
-    private GameObject CreateFallbackProjectile(Vector3 position)
+    private GameObject CreateFallbackProjectile(Vector3 position, Transform parent)
     {
         GameObject bullet = new GameObject("EnemyProjectile");
+        if (parent != null)
+        {
+            bullet.transform.SetParent(parent, false);
+        }
+
         bullet.transform.position = position;
 
         CircleCollider2D collider = bullet.AddComponent<CircleCollider2D>();

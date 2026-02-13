@@ -66,7 +66,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            EnsureEditorPresentation();
+            EnsureEditorPresentation(allowStructuralChanges: true);
             return;
         }
 
@@ -105,15 +105,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        EnsureEditorPresentation();
+        EnsureEditorPresentation(allowStructuralChanges: true);
     }
 
     private void OnValidate()
     {
-        EnsureEditorPresentation();
+        EnsureEditorPresentation(allowStructuralChanges: false);
     }
 
-    private void EnsureEditorPresentation()
+    private void EnsureEditorPresentation(bool allowStructuralChanges)
     {
         if (Application.isPlaying)
         {
@@ -127,9 +127,12 @@ public class PlayerController : MonoBehaviour
         initialBombs = Mathf.Max(0, initialBombs);
 
         spriteRenderer = GetComponent<SpriteRenderer>();
-        EnsurePlayerVisual();
-        EnsureHitboxVisual();
-        SetHitboxVisible(false);
+        if (allowStructuralChanges)
+        {
+            EnsurePlayerVisual();
+            EnsureHitboxVisual();
+            SetHitboxVisible(false);
+        }
 
         Lives = Mathf.Max(1, initialLives);
         Bombs = Mathf.Max(0, initialBombs);
@@ -149,7 +152,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            EnsureEditorPresentation();
+            EnsureEditorPresentation(allowStructuralChanges: true);
             return;
         }
 

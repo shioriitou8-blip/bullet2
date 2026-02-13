@@ -27,6 +27,11 @@ private void Awake()
         despawnTime = Time.time + lifetime;
     }
 
+    private void OnEnable()
+    {
+        RuntimeSpawnGroups.MoveToPlayerBullets(transform);
+    }
+
 public void Initialize(
         Vector2 shotDirection,
         float shotSpeed,

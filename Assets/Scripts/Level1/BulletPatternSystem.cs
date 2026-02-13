@@ -118,7 +118,11 @@ public class BulletPatternSystem : MonoBehaviour
             }
         }
 
-        GameObject bullet = objectPool.Spawn(enemyBulletPoolKey, origin, Quaternion.identity);
+        GameObject bullet = objectPool.Spawn(
+            enemyBulletPoolKey,
+            origin,
+            Quaternion.identity,
+            RuntimeSpawnGroups.GetEnemyBulletsGroup());
         if (bullet == null)
         {
             return;

@@ -34,6 +34,7 @@ public class LevelEnemyController : MonoBehaviour, IDamageable
     [SerializeField] private float bulletLifetime = 7f;
     [SerializeField] private int scoreOnKill = 600;
     [SerializeField] private bool forceRadialOnly;
+    [SerializeField] private float despawnLeftX = -9.5f;
 
     private BulletPatternSystem bulletPatternSystem;
     private Action<LevelEnemyController> onReturnedToPool;
@@ -86,8 +87,8 @@ public class LevelEnemyController : MonoBehaviour, IDamageable
             return;
         }
 
-        transform.position += Vector3.down * moveSpeed * Time.deltaTime;
-        if (transform.position.y < -6.4f)
+        transform.position += Vector3.left * moveSpeed * Time.deltaTime;
+        if (transform.position.x < despawnLeftX)
         {
             ReturnToPool();
             return;
@@ -127,14 +128,15 @@ public class LevelEnemyController : MonoBehaviour, IDamageable
     private void FireByType()
     {
         Vector2 origin = transform.position;
+        Vector2 forward = Vector2.left;
         switch (enemyType)
         {
             case EnemyType.TypeA:
-                bulletPatternSystem.FireStraight(origin, Vector2.down, bulletSpeed, bulletLifetime);
+                bulletPatternSystem.FireStraight(origin, forward, bulletSpeed, bulletLifetime);
                 break;
 
             case EnemyType.TypeB:
-                bulletPatternSystem.FireSpread(origin, Vector2.down, 3, 34f, bulletSpeed, bulletLifetime);
+                bulletPatternSystem.FireSpread(origin, forward, 3, 34f, bulletSpeed, bulletLifetime);
                 break;
 
             case EnemyType.TypeC:
@@ -149,7 +151,7 @@ public class LevelEnemyController : MonoBehaviour, IDamageable
                 }
                 else
                 {
-                    bulletPatternSystem.FireSpread(origin, Vector2.down, 5, 52f, bulletSpeed, bulletLifetime);
+                    bulletPatternSystem.FireSpread(origin, forward, 5, 52f, bulletSpeed, bulletLifetime);
                 }
                 break;
         }

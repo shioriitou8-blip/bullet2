@@ -23,6 +23,7 @@ public class PlayerShooter : MonoBehaviour
     [SerializeField] private float spawnOffsetUnits = 0.22f;
     [SerializeField] private float pointBlankDistance = 1.25f;
     [SerializeField] private LayerMask enemyMask;
+    [SerializeField] private Vector2 baseShotDirection = Vector2.up;
 
     [Header("Shot Type")]
     [SerializeField] private ShotType currentShotType = ShotType.TypeA;
@@ -44,6 +45,14 @@ public class PlayerShooter : MonoBehaviour
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+    }
+
+    private void OnValidate()
+    {
+        if (baseShotDirection.sqrMagnitude <= 0.0001f)
+        {
+            baseShotDirection = Vector2.up;
+        }
     }
 
     private void Update()
@@ -174,12 +183,16 @@ private ShotProfile BuildProfile(ShotType shotType, int powerLevel, bool isFocus
 
     private void SpawnProjectileAtAngle(float angleOffset, ShotProfile profile)
     {
-        Vector2 direction = Quaternion.Euler(0f, 0f, angleOffset) * Vector2.up;
+        Vector2 forward = GetBaseShotDirection();
+        Vector2 direction = Quaternion.Euler(0f, 0f, angleOffset) * forward;
         Vector3 spawnPosition = transform.position + (Vector3)(direction * spawnOffsetUnits);
+        Transform bulletGroup = RuntimeSpawnGroups.GetPlayerBulletsGroup();
 
         GameObject projectile = projectilePrefab != null
-            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity)
-            : CreateFallbackProjectile(spawnPosition);
+            ? Instantiate(projectilePrefab, spawnPosition, Quaternion.identity, bulletGroup)
+            : CreateFallbackProjectile(spawnPosition, bulletGroup);
+
+        RuntimeSpawnGroups.MoveToPlayerBullets(projectile.transform);
 
         PlayerProjectile projectileLogic = projectile.GetComponent<PlayerProjectile>();
         if (projectileLogic == null)
@@ -199,9 +212,34 @@ private ShotProfile BuildProfile(ShotType shotType, int powerLevel, bool isFocus
         Destroy(projectile, projectileLifetime + 0.1f);
     }
 
-    private GameObject CreateFallbackProjectile(Vector3 position)
+    private Vector2 GetBaseShotDirection()
+    {
+        if (baseShotDirection.sqrMagnitude <= 0.0001f)
+        {
+            return Vector2.up;
+        }
+
+        return baseShotDirection.normalized;
+    }
+
+    public void SetBaseShotDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
+        baseShotDirection = direction.normalized;
+    }
+
+    private GameObject CreateFallbackProjectile(Vector3 position, Transform parent)
     {
         GameObject bullet = new GameObject("PlayerProjectile");
+        if (parent != null)
+        {
+            bullet.transform.SetParent(parent, false);
+        }
+
         bullet.transform.position = position;
 
         CircleCollider2D collider = bullet.AddComponent<CircleCollider2D>();

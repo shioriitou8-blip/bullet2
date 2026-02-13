@@ -289,38 +289,89 @@ public class EnemySpawner : MonoBehaviour
     private GameObject CreateBulletPrefab()
     {
         GameObject prefab = new GameObject("Pooled_EnemyBullet");
-        prefab.AddComponent<CircleCollider2D>().isTrigger = true;
+        prefab.SetActive(false);
 
-        Rigidbody2D rb = prefab.AddComponent<Rigidbody2D>();
+        CircleCollider2D circle = prefab.GetComponent<CircleCollider2D>();
+        if (circle == null)
+        {
+            circle = prefab.AddComponent<CircleCollider2D>();
+        }
+
+        circle.isTrigger = true;
+
+        Rigidbody2D rb = prefab.GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            rb = prefab.AddComponent<Rigidbody2D>();
+        }
+
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        prefab.AddComponent<LevelBullet>();
-        prefab.AddComponent<SpriteRenderer>();
-        prefab.SetActive(false);
+        if (prefab.GetComponent<LevelBullet>() == null)
+        {
+            prefab.AddComponent<LevelBullet>();
+        }
+
+        if (prefab.GetComponent<SpriteRenderer>() == null)
+        {
+            prefab.AddComponent<SpriteRenderer>();
+        }
+
         return prefab;
     }
 
     private GameObject CreateEnemyPrefab(string prefabName)
     {
         GameObject prefab = new GameObject(prefabName);
-        prefab.AddComponent<CircleCollider2D>().isTrigger = true;
-        prefab.AddComponent<SpriteRenderer>();
-        prefab.AddComponent<LevelEnemyController>();
         prefab.SetActive(false);
+
+        CircleCollider2D circle = prefab.GetComponent<CircleCollider2D>();
+        if (circle == null)
+        {
+            circle = prefab.AddComponent<CircleCollider2D>();
+        }
+
+        circle.isTrigger = true;
+
+        if (prefab.GetComponent<SpriteRenderer>() == null)
+        {
+            prefab.AddComponent<SpriteRenderer>();
+        }
+
+        if (prefab.GetComponent<LevelEnemyController>() == null)
+        {
+            prefab.AddComponent<LevelEnemyController>();
+        }
+
         return prefab;
     }
 
     private GameObject CreateMiniBossPrefab()
     {
         GameObject prefab = new GameObject("Pooled_MiniBoss");
-        CircleCollider2D collider = prefab.AddComponent<CircleCollider2D>();
+        prefab.SetActive(false);
+
+        CircleCollider2D collider = prefab.GetComponent<CircleCollider2D>();
+        if (collider == null)
+        {
+            collider = prefab.AddComponent<CircleCollider2D>();
+        }
+
         collider.isTrigger = true;
         collider.radius = 0.48f;
-        prefab.AddComponent<SpriteRenderer>();
-        prefab.AddComponent<MiniBossController>();
-        prefab.SetActive(false);
+
+        if (prefab.GetComponent<SpriteRenderer>() == null)
+        {
+            prefab.AddComponent<SpriteRenderer>();
+        }
+
+        if (prefab.GetComponent<MiniBossController>() == null)
+        {
+            prefab.AddComponent<MiniBossController>();
+        }
+
         return prefab;
     }
 
